@@ -1,0 +1,60 @@
+#202313211003 mod8=3
+import numpy as np
+
+# Lineer interpolasyon fonksiyonu
+def linear_interpolation(x0, x1, y0, y1, x):
+    return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+
+
+def energy(I, theta, alpha):
+    return I * np.cos(theta - alpha)
+
+# Gradyan artırma 
+def gradient_ascent(I, alpha, theta_init=0, learning_rate=0.01, iterations=1000):
+    theta = theta_init
+    for _ in range(iterations):
+        # Türevi hesapla
+        gradient = -I * np.sin(theta - alpha)
+        theta += learning_rate * gradient
+        
+        theta = theta % (2 * np.pi)
+    return theta
+
+# Ana program
+def main():
+    student_id = int(input("Öğrenci numaranızı giriniz: "))
+    hour_mod8 = student_id % 8
+
+    # Saat tablosu
+    hours = [12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0]
+    light_intensity = [850, 900, 950, 925, 875, 800, 700, 550]
+    sun_angles_deg = [65, 70, 75, 72, 68, 60, 50, 35]
+
+    # Hesaplanacak saat
+    target_hour = hours[hour_mod8]
+    print(f"Mod 8 sonucu: {hour_mod8}, hesaplanacak saat: {int(target_hour)}:00")
+
+    
+    for i in range(len(hours) - 1):
+        if hours[i] <= target_hour <= hours[i + 1]:
+            # Lineer interpolasyon
+            I = linear_interpolation(hours[i], hours[i + 1], light_intensity[i], light_intensity[i + 1], target_hour)
+            alpha_deg = linear_interpolation(hours[i], hours[i + 1], sun_angles_deg[i], sun_angles_deg[i + 1], target_hour)
+            break
+
+    
+    alpha_rad = np.radians(alpha_deg)
+
+   
+    optimal_theta = gradient_ascent(I, alpha_rad)
+    optimal_energy = energy(I, optimal_theta, alpha_rad)
+
+    
+    print(f"Interpolasyon ile bulunan ışık şiddeti (I): {I:.2f} W/m²")
+    print(f"Interpolasyon ile bulunan güneş açısı (α): {alpha_deg:.2f} derece ({alpha_rad:.2f} radyan)")
+    print(f"Maksimum enerji üretimi için θ açısı: {np.degrees(optimal_theta):.2f} derece ({optimal_theta:.2f} radyan)")
+    print(f"Maksimum enerji üretimi: {optimal_energy:.2f} W")
+
+if __name__ == "__main__":
+    main()
+
